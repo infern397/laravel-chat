@@ -11,6 +11,12 @@ export default {
             body: '',
         }
     },
+    created() {
+        Echo.channel('store_message')
+            .listen('.store_message', res => {
+                this.messages.push(res.message);
+            })
+    },
     methods: {
         store() {
             axios.post('/messages', {body: this.body})
