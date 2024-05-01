@@ -2,6 +2,7 @@
 import axios from "axios";
 import Layout from "@/Pages/Layouts/Layout.vue";
 import { Link } from "@inertiajs/inertia-vue3";
+import {usePage} from "@inertiajs/vue3";
 
 
 export default {
@@ -26,7 +27,12 @@ export default {
     },
     methods: {
         store() {
-            axios.post('/messages', {body: this.body})
+            const page = usePage()
+            axios.post('/messages', {
+                body: this.body,
+                receiver_id: this.otherUser.id,
+                sender_id: page.props.auth.user.id
+            })
                 .then(res => {
                     this.messages.push(res.data);
                     this.body = '';
