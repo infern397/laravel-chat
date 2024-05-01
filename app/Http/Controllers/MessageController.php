@@ -42,7 +42,7 @@ class MessageController extends Controller
 
         $message = Message::query()->create($data);
 
-//        broadcast(new StoreMessageEvent($message))->toOthers();
+        broadcast(new StoreMessageEvent($message))->toOthers();
 
         return MessageResource::make($message)->resolve();
     }

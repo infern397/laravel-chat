@@ -19,11 +19,15 @@ export default {
         }
     },
     created() {
-        Echo.channel('store_message')
+        const page = usePage()
+        const sender_id = page.props.auth.user.id
+        const receiver_id = this.otherUser.id
+
+        Echo.channel('messages.' + sender_id + '.' + receiver_id)
             .listen('.store_message', res => {
                 this.messages.push(res.message);
             })
-        console.log(this.users)
+
     },
     methods: {
         store() {

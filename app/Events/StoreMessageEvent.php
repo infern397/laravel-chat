@@ -34,7 +34,8 @@ class StoreMessageEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('store_message'),
+            new PrivateChannel('messages.' . $this->message->sender_id . '.' . $this->message->receiver_id),
+            new PrivateChannel('messages.' . $this->message->receiver_id . '.' . $this->message->sender_id),
         ];
     }
 
@@ -53,8 +54,9 @@ class StoreMessageEvent implements ShouldBroadcast
      */
     public function broadcastWith(): array
     {
+        $message = MessageResource::make($this->message)->resolve();
         return [
-            'message' => MessageResource::make($this->message)->resolve()
+            'message' => $message
         ];
     }
 }
