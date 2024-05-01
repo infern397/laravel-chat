@@ -1,6 +1,25 @@
 <script>
+import axios from "axios";
+
 export default {
-    name: "Index"
+    name: "Index",
+    props: [
+        'messages',
+    ],
+    data() {
+        return {
+            body: '',
+        }
+    },
+    methods: {
+        store() {
+            axios.post('/messages', {body: this.body})
+                .then(res => {
+                    this.messages.push(res.data);
+                    this.body = '';
+                })
+        }
+    }
 }
 </script>
 
@@ -171,15 +190,18 @@ export default {
                         <img src="https://placehold.co/200x/ffa8e4/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="User Avatar"
                              class="w-8 h-8 rounded-full">
                     </div>
-                    <div class="flex max-w-96 bg-white rounded-lg p-3 gap-3">
+                    <div class="flex-col max-w-96 bg-white rounded-lg p-3 gap-3">
                         <p class="text-gray-700">Hey Bob, how's it going?</p>
+                        <p class="text-gray-500 text-xs">erwr</p>
                     </div>
                 </div>
 
                 <!-- Outgoing Message -->
                 <div class="flex justify-end mb-4 cursor-pointer">
-                    <div class="flex max-w-96 bg-indigo-500 text-white rounded-lg p-3 gap-3">
+                    <div class="flex-col max-w-96 bg-indigo-500 text-white rounded-lg p-3 gap-3">
                         <p>Hi Alice! I'm good, just finished a great book. How about you?</p>
+                        <p class="text-gray-200 text-xs w-fit ml-auto">erwr</p>
+
                     </div>
                     <div class="w-9 h-9 rounded-full flex items-center justify-center ml-2">
                         <img src="https://placehold.co/200x/b7a8ff/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="My Avatar"
@@ -187,112 +209,26 @@ export default {
                     </div>
                 </div>
 
-                <!-- Incoming Message -->
-                <div class="flex mb-4 cursor-pointer">
+                <!--                -->
+
+                <div class="flex mb-4 cursor-pointer" v-for="message in messages">
                     <div class="w-9 h-9 rounded-full flex items-center justify-center mr-2">
                         <img src="https://placehold.co/200x/ffa8e4/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="User Avatar"
                              class="w-8 h-8 rounded-full">
                     </div>
-                    <div class="flex max-w-96 bg-white rounded-lg p-3 gap-3">
-                        <p class="text-gray-700">That book sounds interesting! What's it about?</p>
+                    <div class="flex-col max-w-96 bg-white rounded-lg p-3 gap-3">
+                        <p class="text-gray-700">{{ message.body }}</p>
+                        <p class="text-gray-500 text-xs">{{ message.time }}</p>
                     </div>
                 </div>
-
-                <!-- Outgoing Message -->
-                <div class="flex justify-end mb-4 cursor-pointer">
-                    <div class="flex max-w-96 bg-indigo-500 text-white rounded-lg p-3 gap-3">
-                        <p>It's about an astronaut stranded on Mars, trying to survive. Gripping stuff!</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-full flex items-center justify-center ml-2">
-                        <img src="https://placehold.co/200x/b7a8ff/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="My Avatar"
-                             class="w-8 h-8 rounded-full">
-                    </div>
-                </div>
-
-                <!-- Incoming Message -->
-                <div class="flex mb-4 cursor-pointer">
-                    <div class="w-9 h-9 rounded-full flex items-center justify-center mr-2">
-                        <img src="https://placehold.co/200x/ffa8e4/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="User Avatar"
-                             class="w-8 h-8 rounded-full">
-                    </div>
-                    <div class="flex max-w-96 bg-white rounded-lg p-3 gap-3">
-                        <p class="text-gray-700">I'm intrigued! Maybe I'll borrow it from you when you're done?</p>
-                    </div>
-                </div>
-
-                <!-- Outgoing Message -->
-                <div class="flex justify-end mb-4 cursor-pointer">
-                    <div class="flex max-w-96 bg-indigo-500 text-white rounded-lg p-3 gap-3">
-                        <p>Of course! I'll drop it off at your place tomorrow.</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-full flex items-center justify-center ml-2">
-                        <img src="https://placehold.co/200x/b7a8ff/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="My Avatar"
-                             class="w-8 h-8 rounded-full">
-                    </div>
-                </div>
-
-                <!-- Incoming Message -->
-                <div class="flex mb-4 cursor-pointer">
-                    <div class="w-9 h-9 rounded-full flex items-center justify-center mr-2">
-                        <img src="https://placehold.co/200x/ffa8e4/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="User Avatar"
-                             class="w-8 h-8 rounded-full">
-                    </div>
-                    <div class="flex max-w-96 bg-white rounded-lg p-3 gap-3">
-                        <p class="text-gray-700">Thanks, you're the best!</p>
-                    </div>
-                </div>
-
-                <!-- Outgoing Message -->
-                <div class="flex justify-end mb-4 cursor-pointer">
-                    <div class="flex max-w-96 bg-indigo-500 text-white rounded-lg p-3 gap-3">
-                        <p>Anytime! Let me know how you like it. 😊</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-full flex items-center justify-center ml-2">
-                        <img src="https://placehold.co/200x/b7a8ff/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="My Avatar"
-                             class="w-8 h-8 rounded-full">
-                    </div>
-                </div>
-
-                <!-- Incoming Message -->
-                <div class="flex mb-4 cursor-pointer">
-                    <div class="w-9 h-9 rounded-full flex items-center justify-center mr-2">
-                        <img src="https://placehold.co/200x/ffa8e4/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="User Avatar"
-                             class="w-8 h-8 rounded-full">
-                    </div>
-                    <div class="flex max-w-96 bg-white rounded-lg p-3 gap-3">
-                        <p class="text-gray-700">So, pizza next week, right?</p>
-                    </div>
-                </div>
-
-                <!-- Outgoing Message -->
-                <div class="flex justify-end mb-4 cursor-pointer">
-                    <div class="flex max-w-96 bg-indigo-500 text-white rounded-lg p-3 gap-3">
-                        <p>Absolutely! Can't wait for our pizza date. 🍕</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-full flex items-center justify-center ml-2">
-                        <img src="https://placehold.co/200x/b7a8ff/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="My Avatar"
-                             class="w-8 h-8 rounded-full">
-                    </div>
-                </div>
-                <!-- Incoming Message -->
-                <div class="flex mb-4 cursor-pointer">
-                    <div class="w-9 h-9 rounded-full flex items-center justify-center mr-2">
-                        <img src="https://placehold.co/200x/ffa8e4/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato" alt="User Avatar"
-                             class="w-8 h-8 rounded-full">
-                    </div>
-                    <div class="flex max-w-96 bg-white rounded-lg p-3 gap-3">
-                        <p class="text-gray-700">Hoorayy!!</p>
-                    </div>
-                </div>
-
             </div>
 
             <!-- Chat Input -->
             <footer class="bg-white border-t border-gray-300 p-4 absolute bottom-0 w-3/4">
                 <div class="flex items-center">
-                    <input type="text" placeholder="Type a message..."
+                    <input type="text" placeholder="Type a message..." v-model="body"
                            class="w-full p-2 rounded-md border border-gray-400 focus:outline-none focus:border-blue-500">
-                    <button class="bg-indigo-500 text-white px-4 py-2 rounded-md ml-2">Send</button>
+                    <button class="bg-indigo-500 text-white px-4 py-2 rounded-md ml-2" @click="store">Send</button>
                 </div>
             </footer>
         </div>

@@ -11,7 +11,9 @@ class MessageController extends Controller
 {
     public function index()
     {
-        return inertia('Message/Index');
+        $messages = Message::all();
+        $messages = MessageResource::collection($messages)->resolve();
+        return inertia('Message/Index', ['messages' => $messages]);
     }
 
     public function store(StoreRequest $request)
