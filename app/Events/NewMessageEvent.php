@@ -4,13 +4,15 @@ namespace App\Events;
 
 use App\Http\Resources\Message\MessageResource;
 use App\Models\Message;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class StoreMessageEvent implements ShouldBroadcast
+class NewMessageEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -31,25 +33,17 @@ class StoreMessageEvent implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
+
         return [
-            new PrivateChannel('messages.' . $this->message->sender_id . '.' . $this->message->receiver_id),
-            new PrivateChannel('messages.' . $this->message->receiver_id . '.' . $this->message->sender_id),
+            new PrivateChannel('new_messages.' . $this->message->receiver_id),
         ];
     }
 
-    /**
-     * The model event's broadcast name.
-     */
     public function broadcastAs(): string
     {
-        return 'store_message';
+        return 'new_message';
     }
 
-    /**
-     * Get the data to broadcast for the model.
-     *
-     * @return array<string, mixed>
-     */
     public function broadcastWith(): array
     {
         $message = MessageResource::make($this->message)->resolve();
