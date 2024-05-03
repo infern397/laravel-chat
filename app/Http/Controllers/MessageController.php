@@ -8,11 +8,19 @@ use App\Http\Requests\Message\StoreRequest;
 use App\Http\Resources\Message\MessageResource;
 use App\Models\Message;
 use App\Models\User;
+use App\Services\PusherService;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class MessageController extends Controller
 {
+    protected PusherService $pusherService;
+
+    public function __construct(PusherService $pusherService)
+    {
+        $this->pusherService = $pusherService;
+    }
+
     public function index(User $otherUser = null)
     {
         $currentUser = auth()->user();
@@ -34,8 +42,9 @@ class MessageController extends Controller
         }
         $messages = MessageResource::collection($messages)->resolve();
 
+
         return inertia('Message/Index',
-            ['messages' => $messages, 'users' => $users, 'otherUser' => $otherUser]
+            ['messages' => $messages, 'users' => $users, 'otherUser' => $otherUser, 'currentUser' => $currentUser]
         );
     }
 
@@ -49,6 +58,8 @@ class MessageController extends Controller
 
         broadcast(new NewMessageEvent($message))->toOthers();
         broadcast(new StoreMessageEvent($message))->toOthers();
+
+        $this->pusherService->notify($request->receiver_id, $request->body);
 
         return MessageResource::make($message)->resolve();
     }

@@ -12,22 +12,40 @@ export default {
         'messages',
         'otherUser',
         'users',
+        'currentUser'
     ],
     data() {
         return {
             body: '',
-            userid: null
-
+            userid: null,
+            user: null,
+            showEdit: false
         }
     },
     mounted() {
         this.scrollToBottom()
+
+        let script = document.createElement('script')
+        script.src = "https://js.pusher.com/beams/1.0/push-notifications-cdn.js"
+        script.async = true
+        document.body.appendChild(script)
+
+        script.onload = () => {
+            this.beamsClient = new PusherPushNotifications.Client({
+                instanceId: 'ab8ac48b-267c-4e14-903a-3479977bd1ae',
+            });
+
+            this.beamsClient.start()
+                .then(() => this.beamsClient.addDeviceInterest(`user-${this.userid}`))
+                .then(() => console.log('Successfully registered and subscribed!'))
+                .catch(console.error);
+        }
     },
     created() {
         const page = usePage()
-        this.userid = page.props.auth.user.id
-        const sender_id = page.props.auth.user.id
-        const receiver_id = this.otherUser.id
+        this.userid = page.props.auth.user.id;
+        const sender_id = page.props.auth.user.id;
+        const receiver_id = this.otherUser.id;
         Echo.private('messages.' + sender_id + '.' + receiver_id)
             .listen('.store_message', res => {
                 this.messages.push(res.message);
@@ -62,6 +80,8 @@ export default {
                 .then(res => {
                     this.messages.push(res.data);
                     this.body = '';
+                    const receiver = this.users.find(user => user.id === res.data.receiver_id);
+                    receiver.lastMessage = res.data;
                     this.scrollToBottom()
                 })
         },
@@ -93,27 +113,12 @@ export default {
 
 <template>
     <Layout :users="users">
-        <div class="w-1/4 bg-white border-r border-gray-300">
+        <div class="w-1/4 bg-white border-r border-gray-300 ">
             <!-- Sidebar Header -->
             <header class="p-4 border-b border-gray-300 flex justify-between items-center bg-indigo-600 text-white">
                 <h1 class="text-2xl font-semibold">Chat Web</h1>
                 <div class="relative">
-                    <button id="menuButton" class="focus:outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-100" viewBox="0 0 20 20"
-                             fill="currentColor">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                            <path d="M2 10a2 2 0 012-2h12a2 2 0 012 2 2 2 0 01-2 2H4a2 2 0 01-2-2z"/>
-                        </svg>
-                    </button>
-                    <!-- Menu Dropdown -->
-                    <div id="menuDropdown"
-                         class="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg hidden">
-                        <ul class="py-2 px-3">
-                            <li><a href="#" class="block px-4 py-2 text-gray-800 hover:text-gray-400">Option 1</a></li>
-                            <li><a href="#" class="block px-4 py-2 text-gray-800 hover:text-gray-400">Option 2</a></li>
-                            <!-- Add more menu options here -->
-                        </ul>
-                    </div>
+                    <p>{{ currentUser.name }}</p>
                 </div>
             </header>
 
@@ -133,7 +138,8 @@ export default {
                                     user.isOnline ? 'Online' : 'Offline'
                                 }}</h2>
                         </div>
-                        <p class="text-gray-600" v-if="user.lastMessage">{{ user.lastMessage.sender_id === userid ? 'You: ' : ''}} {{
+                        <p class="text-gray-600" v-if="user.lastMessage">
+                            {{ user.lastMessage.sender_id === userid ? 'You: ' : '' }} {{
                                 user.lastMessage.body
                             }}</p>
                     </div>
