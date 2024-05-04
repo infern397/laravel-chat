@@ -59,7 +59,7 @@ class MessageController extends Controller
         broadcast(new NewMessageEvent($message))->toOthers();
         broadcast(new StoreMessageEvent($message))->toOthers();
 
-        $this->pusherService->notify($request->receiver_id, $request->body);
+        $this->pusherService->notify($data['receiver_id'], $data['sender_id'], $request->body);
 
         return MessageResource::make($message)->resolve();
     }

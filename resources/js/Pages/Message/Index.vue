@@ -19,33 +19,21 @@ export default {
             body: '',
             userid: null,
             user: null,
-            showEdit: false
+            isSubscribed: false,
+
         }
     },
     mounted() {
         this.scrollToBottom()
-
-        let script = document.createElement('script')
-        script.src = "https://js.pusher.com/beams/1.0/push-notifications-cdn.js"
-        script.async = true
-        document.body.appendChild(script)
-
-        script.onload = () => {
-            this.beamsClient = new PusherPushNotifications.Client({
-                instanceId: 'ab8ac48b-267c-4e14-903a-3479977bd1ae',
-            });
-
-            this.beamsClient.start()
-                .then(() => this.beamsClient.addDeviceInterest(`user-${this.userid}`))
-                .then(() => console.log('Successfully registered and subscribed!'))
-                .catch(console.error);
-        }
     },
     created() {
         const page = usePage()
         this.userid = page.props.auth.user.id;
         const sender_id = page.props.auth.user.id;
         const receiver_id = this.otherUser.id;
+
+        this.checkSubscriptionStatus()
+
         Echo.private('messages.' + sender_id + '.' + receiver_id)
             .listen('.store_message', res => {
                 this.messages.push(res.message);
@@ -106,8 +94,48 @@ export default {
             if (user) {
                 user.lastMessage = message;
             }
-        }
-    }
+        },
+        subscribeToNotifications() {
+            if (this.isSubscribed) {
+                this.beamsClient.removeDeviceInterest(`user-${this.userid}-${this.otherUser.id}`)
+                    .then(() => {
+                        console.log('Successfully unsubscribed!');
+                        this.isSubscribed = false;
+                    })
+                    .catch(console.error);
+            } else {
+
+
+                this.beamsClient.start()
+                    .then(() => this.beamsClient.addDeviceInterest(`user-${this.userid}-${this.otherUser.id}`))
+                    .then(() => {
+                        console.log('Successfully registered and subscribed!');
+                        this.isSubscribed = true;
+                    })
+                    .catch(console.error);
+            }
+        },
+        checkSubscriptionStatus() {
+            let script = document.createElement('script')
+            script.src = "https://js.pusher.com/beams/1.0/push-notifications-cdn.js"
+            script.async = true
+            document.body.appendChild(script)
+
+            script.onload = () => {
+                this.beamsClient = new PusherPushNotifications.Client({
+                    instanceId: 'ab8ac48b-267c-4e14-903a-3479977bd1ae',
+                });
+
+                this.beamsClient.start()
+                    .then(() => this.beamsClient.getDeviceInterests())
+                    .then((interests) => {
+                        this.isSubscribed = interests.includes(`user-${this.userid}-${this.otherUser.id}`);
+                    })
+                    .catch(console.error);
+            }
+        },
+    },
+
 }
 </script>
 
@@ -151,8 +179,11 @@ export default {
         <!-- Main Chat Area -->
         <div class="flex-1">
             <!-- Chat Header -->
-            <header class="bg-white p-4 text-gray-700">
+            <header class="bg-white flex justify-between p-4 text-gray-700">
                 <h1 class="text-2xl font-semibold">{{ otherUser.name }}</h1>
+                <button class="bg-indigo-500 text-white px-4 py-2 rounded-md ml-2" @click="subscribeToNotifications">
+                    {{ isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
+                </button>
             </header>
 
             <!-- Chat Messages -->
